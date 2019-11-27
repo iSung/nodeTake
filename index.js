@@ -47,11 +47,12 @@ app.get('/getLuckList', (req, res) => {
       // 如果访问失败或者出错，会这行这里
       res.send('获取数据失败');
     } else {
+      res.header('Access-Control-Allow-Origin', '*');
       res.send(getHostLuck(data, num));
     }
   });
 });
 
-app.listen(3000, () => { 
-  console.log('App listening on port 3000!');
+app.listen(4000, () => { 
+  console.log('App listening on port 4000!');
 });
