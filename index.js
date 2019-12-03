@@ -3,14 +3,18 @@ const app = new express();
 const schedule = require('node-schedule');
 const superagent = require('superagent');
 const cheerio = require('cheerio');
-// const rule = new schedule.RecurrenceRule();
-// rule.dayOfWeek = [2, 4, 7];
-// rule.hour = 21;
-// rule.minute = 30;
+const sendEmail = require('./sendEmail');
 
-// const getList = schedule.scheduleJob(rule, function(){
-//   request('')
-// });
+const rule = new schedule.RecurrenceRule();
+rule.dayOfWeek = [2, 4, 7];
+rule.hour = 21;
+rule.minute = 30;
+
+schedule.scheduleJob(rule, async function(){
+  await getToDayLuckNumber().then(({date, lcukNumber }) => {
+    sendEmail(date, lcukNumber);
+  });
+});
 
 const getHostLuck = (data, num) => {
   let luckList = [];
@@ -39,6 +43,39 @@ const getHostLuck = (data, num) => {
   return luckList;
 }
 
+const getLuck = (data) => {
+  let $ = cheerio.load(data.text);
+  let date, lcukNumber; 
+  $('.kaij-data').each((i, e) => {
+    date = $(e).find('.kaij-title .kaij-qs').text();
+    let text = $(e).find('.kaij-cartoon').text().replace(/\ +/g, '');
+    text = text.replace(/[\r\n]/g, ',').replace(/^,+/,"").replace(/,+$/,"");
+    lcukNumber = text;
+  });
+
+  return {
+    date,
+    lcukNumber
+  };
+};
+
+const getToDayLuckNumber = () => {
+  return new Promise((resolve, reject) => {
+    const baseUrl = 'https://kjh.55128.cn/history_ssq.aspx';
+    superagent.get(baseUrl).end((err, data) => {
+      if (err) {
+        // 如果访问失败或者出错，会这行这里
+        reject({
+          date: '',
+          lcukNumber: ''
+        });
+      } else {
+        resolve(getLuck(data));
+      }
+    });
+  });
+};
+
 app.get('/getLuckList', (req, res) => {
   const num = req.query.num || 30;
   const baseUrl = `https://kjh.55128.cn/ssq-history-${num}.htm`
@@ -49,6 +86,19 @@ app.get('/getLuckList', (req, res) => {
     } else {
       res.header('Access-Control-Allow-Origin', '*');
       res.send(getHostLuck(data, num));
+    }
+  });
+});
+
+app.get('/gettoDayLuck', (req, res) => {
+  const baseUrl = 'https://kjh.55128.cn/history_ssq.aspx';
+  superagent.get(baseUrl).end((err, data) => {
+    if (err) {
+      // 如果访问失败或者出错，会这行这里
+      res.send('获取数据失败');
+    } else {
+      res.header('Access-Control-Allow-Origin', '*');
+      res.send(getLuck(data));
     }
   });
 });
