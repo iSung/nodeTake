@@ -1,4 +1,5 @@
 const nodemailer = require('nodemailer');
+const date = new Date();
 
 // 发送信息配置
 const transporter = nodemailer.createTransport({
@@ -14,13 +15,17 @@ const transporter = nodemailer.createTransport({
 });
 
 module.exports = sendEmail = (subject, luckNumber) => {
+  let luckItem = '';
+  luckNumber.forEach((e, i) => {
+    let isEnd = i === luckNumber.length - 1;
+    luckItem += `<b style="color:${isEnd ? 'blue' : 'red'}">${e}${isEnd ? '' : ','}</b>`
+  });
   let mailOptions = {
-    from: '"财神爷来啦" <2787616995@qq.com>', // sender address
-    to: '874738290@qq.com', // list of receivers
+    from: `"${date.toLocaleDateString()}：双色球开奖结果" <2787616995@qq.com>`, // sender address
+    to: '874738290@qq.com, maruokun@aliyun.com', // list of receivers
     subject, // Subject line
     // 发送text或者html格式
-    // text: 'Hello world?', // plain text body
-    html: `<h1>${subject}期开奖结果：${luckNumber}</h1>` // html body
+    html: `<h1>${subject}期开奖结果：${luckItem}</h1>` // html body
   };
   
   transporter.sendMail(mailOptions, (error, info) => {

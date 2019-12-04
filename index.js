@@ -50,7 +50,7 @@ const getLuck = (data) => {
     date = $(e).find('.kaij-title .kaij-qs').text();
     let text = $(e).find('.kaij-cartoon').text().replace(/\ +/g, '');
     text = text.replace(/[\r\n]/g, ',').replace(/^,+/,"").replace(/,+$/,"");
-    lcukNumber = text;
+    lcukNumber = text.split(',');
   });
 
   return {
@@ -67,7 +67,7 @@ const getToDayLuckNumber = () => {
         // 如果访问失败或者出错，会这行这里
         reject({
           date: '',
-          lcukNumber: ''
+          lcukNumber: []
         });
       } else {
         resolve(getLuck(data));
@@ -106,3 +106,4 @@ app.get('/gettoDayLuck', (req, res) => {
 app.listen(4000, () => { 
   console.log('App listening on port 4000!');
 });
+
