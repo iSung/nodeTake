@@ -103,7 +103,17 @@ const app = new express();
 //   });
 // });
 
-app.use(express.static('public'));
+// app.use(express.static('public'));
+const json = {
+  name: 1,
+  children: [{
+    name: 'sung'
+  }]
+};
+app.get('/jsonp', (req, res) => {
+  const { callback } = req.params;
+  res.send(callback(json));
+});
 app.listen(4000, () => { 
   console.log('App listening on port 4000!');
 });
